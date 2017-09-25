@@ -5,7 +5,7 @@ import "./zeppelin/crowdsale/RefundableCrowdsale.sol";
 import "./zeppelin/token/TokenTimelock.sol";
 import "./LindaToken.sol";
 
-contract LindaCrowdsale is CappedCrowdsale, RefundableCrowdsale {
+contract LindaCrowdsale is CappedCrowdsale, RefundableCrowdsale, Pausable {
 
     // time for tokens to be locked in their respective vaults
 
@@ -60,6 +60,7 @@ contract LindaCrowdsale is CappedCrowdsale, RefundableCrowdsale {
         require(teamWallet != 0x0);
         require(wallet != 0x0);
 
+        if (goalReached()) {
         // freeze tokens
         teamVault = new TokenTimelock(token, teamWallet, uint64(now) + teamLockTime);
         unsoldVault = new TokenTimelock(token, wallet, uint64(now) + unsoldLockTime);
@@ -71,12 +72,16 @@ contract LindaCrowdsale is CappedCrowdsale, RefundableCrowdsale {
         token.mint(teamVault, teamTokens);
         token.mint(unsoldVault, unsoldTokens);
         token.mint(wallet, ecosystemTokens);
-
+        }
 
         token.finishMinting();
         super.finalization();
 
-
     }
+
+    function buyTokens(address beneficiary) public payable whenNotPaused {
+    super.buyTokens(beneficiary);
+    }
+
 
 }
