@@ -14,11 +14,12 @@ contract LindaCrowdsale is CappedCrowdsale, RefundableCrowdsale, Pausable {
 
     // address where team funds are collected
     address public teamWallet;
+    address public tokenOwner;
 
     // how many token in percentage will correspond to team and sale
-    uint256 public teamPercentage;
-    uint256 public salePercentage;
-    uint256 public ecosystemPercentage;
+    uint256 public teamPercentage = 20;
+    uint256 public salePercentage = 45;
+    uint256 public ecosystemPercentage = 31;
 
     uint256 public maximumSaleTokenSupply;
     uint256 public teamTokens;
@@ -30,7 +31,7 @@ contract LindaCrowdsale is CappedCrowdsale, RefundableCrowdsale, Pausable {
     TokenTimelock public unsoldVault;
 
 
-    function LindaCrowdsale(uint256 _startTime, uint256 _endTime, uint256 _rate, uint256 _goal, uint256 _cap, address _wallet, address _teamWallet, uint64 _teamLockTime, uint64 _unsoldLockTime, uint256 _teamPercentage, uint256 _salePercentage, uint256 _ecosystemPercentage)
+    function LindaCrowdsale(uint256 _startTime, uint256 _endTime, uint256 _rate, uint256 _goal, uint256 _cap, address _wallet, address _teamWallet, address _tokenAddress, address _tokenOwner, uint64 _teamLockTime, uint64 _unsoldLockTime)
     CappedCrowdsale(_cap)
     FinalizableCrowdsale()
     RefundableCrowdsale(_goal)
@@ -43,16 +44,15 @@ contract LindaCrowdsale is CappedCrowdsale, RefundableCrowdsale, Pausable {
         maximumSaleTokenSupply = _cap.mul(_rate);
         teamWallet = _teamWallet;
         wallet = _wallet;
+        tokenOwner = _tokenOwner;
         teamLockTime = _teamLockTime;
         unsoldLockTime = _unsoldLockTime;
-        teamPercentage = _teamPercentage;
-        salePercentage = _salePercentage;
-        ecosystemPercentage = _ecosystemPercentage;
+        token = createTokenContract(_tokenAddress);
 
     }
 
-    function createTokenContract() internal returns (MintableToken) {
-        return new LindaToken();
+    function createTokenContract(address tokenAddress) internal returns (MintableToken) {
+        return LindaToken(tokenAddress);
     }
 
     function finalization() internal {
@@ -75,6 +75,7 @@ contract LindaCrowdsale is CappedCrowdsale, RefundableCrowdsale, Pausable {
         }
 
         token.finishMinting();
+        token.transferOwnership(tokenOwner);
         super.finalization();
 
     }
@@ -82,6 +83,12 @@ contract LindaCrowdsale is CappedCrowdsale, RefundableCrowdsale, Pausable {
     function buyTokens(address beneficiary) public payable whenNotPaused {
     super.buyTokens(beneficiary);
     }
+
+    // @return true if crowdsale event has started
+    function hasStarted() public constant returns (bool) {
+        return now > startTime;
+    }
+
 
 
 }

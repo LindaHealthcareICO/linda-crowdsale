@@ -6,11 +6,12 @@ import "./LindaToken.sol";
 
 contract LindaPresale is CappedCrowdsale, RefundableCrowdsale {
 
+    uint256 public discount = 10; // fixed discount: 1 free token for each 10 purchased
 
     uint256 public maximumTokenSupply;
-    uint256 public discount;
+    address public tokenOwner;
 
-    function LindaPresale(uint256 _startTime, uint256 _endTime, uint256 _rate, uint256 _goal, uint256 _cap, uint256 _discount, address _wallet)
+    function LindaPresale(uint256 _startTime, uint256 _endTime, uint256 _rate, uint256 _goal, uint256 _cap, address _tokenOwner, address _wallet)
     CappedCrowdsale(_cap)
     FinalizableCrowdsale()
     RefundableCrowdsale(_goal)
@@ -19,8 +20,8 @@ contract LindaPresale is CappedCrowdsale, RefundableCrowdsale {
         //As goal needs to be met for a successful crowdsale
         //the value needs to less or equal than a cap which is limit for accepted funds
         require(_goal <= _cap);
-        discount = _discount;
         maximumTokenSupply = _cap.mul(_rate);
+        tokenOwner = _tokenOwner;
 
 
     }
@@ -52,10 +53,15 @@ contract LindaPresale is CappedCrowdsale, RefundableCrowdsale {
 
 
     function finalization() internal {
-
+        token.transferOwnership(tokenOwner);
         super.finalization();
 
 
+    }
+
+    // @return true if crowdsale event has started
+    function hasStarted() public constant returns (bool) {
+        return now > startTime;
     }
 
 }
