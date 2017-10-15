@@ -27,9 +27,6 @@ contract('LindaCrowdsale', function([_, owner, investor, purchaser1, purchaser2,
   const value2 = ether(15);
   const teamLockedTime = duration.weeks(40);
   const unsoldLockedTime = latestTime() + duration.years(1);
-  const teamPercentage = new BigNumber(20);
-  const salePercentage = new BigNumber(45);
-  const ecosystemPercentage = new BigNumber(31);
 
   before(async function() {
     //Advance to the next block to correctly read time in the solidity "now" function interpreted by testrpc
@@ -40,11 +37,11 @@ contract('LindaCrowdsale', function([_, owner, investor, purchaser1, purchaser2,
     this.startTime = latestTime() + duration.weeks(1);
     this.endTime =   this.startTime + duration.weeks(1);
     this.afterEndTime = this.endTime + duration.seconds(1)
+    this.token = await LindaToken.new({from: owner});
 
+    this.crowdsale = await LindaCrowdsale.new(this.startTime, this.endTime, rate, goal, cap, wallet, teamWallet, this.token.address, owner,teamLockedTime, unsoldLockedTime, {from: owner})
 
-    this.crowdsale = await LindaCrowdsale.new(this.startTime, this.endTime, rate, goal, cap, wallet, teamWallet, teamLockedTime, unsoldLockedTime, teamPercentage, salePercentage, ecosystemPercentage, {from: owner})
-
-    this.token = LindaToken.at(await this.crowdsale.token())
+    await this.token.transferOwnership(this.crowdsale.address, {from: owner})
 
     this.vault = RefundVault.at(await this.crowdsale.vault())
   })
@@ -52,7 +49,7 @@ contract('LindaCrowdsale', function([_, owner, investor, purchaser1, purchaser2,
   describe('creating a valid crowdsale', function () {
 
    it('should fail with zero goal', async function () {
-      await LindaCrowdsale.new(this.startTime, this.endTime, rate, 0, cap, wallet, teamWallet, teamLockedTime, unsoldLockedTime, teamPercentage, salePercentage, ecosystemPercentage, {from: owner}).should.be.rejectedWith(EVMThrow);
+      await LindaCrowdsale.new(this.startTime, this.endTime, rate, 0, cap, wallet, teamWallet, teamLockedTime, unsoldLockedTime, {from: owner}).should.be.rejectedWith(EVMThrow);
     })
 
   });

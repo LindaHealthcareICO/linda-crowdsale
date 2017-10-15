@@ -11,8 +11,8 @@ const should = require('chai')
   .use(require('chai-bignumber')(BigNumber))
   .should()
 
-const LindaToken = artifacts.require("./LindaToken.sol");
-const LindaPresale = artifacts.require('./LindaPresale.sol')
+var LindaToken = artifacts.require("../contracts/LindaToken.sol");
+var LindaPresale = artifacts.require('../contracts/LindaPresale.sol')
 
 contract('LindaPresale', function([_, owner, investor, purchaser1, purchaser2, wallet]) {
 
@@ -35,10 +35,9 @@ contract('LindaPresale', function([_, owner, investor, purchaser1, purchaser2, w
   beforeEach(async function () {
     this.startTime = latestTime() + duration.weeks(1);
     this.endTime =   this.startTime + duration.weeks(1);
-    this.afterEndTime = this.endTime + duration.seconds(1)
+    this.afterEndTime = this.endTime + duration.seconds(1);
 
-
-    this.crowdsale = await LindaPresale.new(this.startTime, this.endTime, rate, goal, cap, discount, wallet, {from: owner})
+    this.crowdsale = await LindaPresale.new(this.startTime, this.endTime, rate, goal, cap,  owner, wallet, {from: owner})
 
     this.token = LindaToken.at(await this.crowdsale.token())
   })
@@ -46,7 +45,7 @@ contract('LindaPresale', function([_, owner, investor, purchaser1, purchaser2, w
   describe('creating a valid crowdsale', function () {
 
     it('should fail with zero cap', async function () {
-      await LindaPresale.new(this.startTime, this.endTime, rate, goal, 0, discount, wallet, {from: owner}).should.be.rejectedWith(EVMThrow);
+      await LindaPresale.new(this.startTime, this.endTime, rate, goal, 0,  owner, wallet, {from: owner}).should.be.rejectedWith(EVMThrow);
     })
 
   });

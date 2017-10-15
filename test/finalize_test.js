@@ -21,9 +21,6 @@ contract('LindaCrowdsale', function ([_, owner, wallet, thirdparty, teamWallet])
   const goal = ether(42.63);
   const teamLockedTime = duration.weeks(40);
   const unsoldLockedTime = latestTime() + duration.years(1);
-  const teamPercentage = new BigNumber(20);
-  const salePercentage = new BigNumber(45);
-  const ecosystemPercentage = new BigNumber(31);
 
   before(async function() {
     //Advance to the next block to correctly read time in the solidity "now" function interpreted by testrpc
@@ -35,10 +32,12 @@ contract('LindaCrowdsale', function ([_, owner, wallet, thirdparty, teamWallet])
     this.endTime =   this.startTime + duration.weeks(1)
     this.afterEndTime = this.endTime + duration.seconds(1)
 
+    this.token = await LindaToken.new({from: owner});
 
-    this.crowdsale = await LindaCrowdsale.new(this.startTime, this.endTime, rate, goal, cap, wallet, teamWallet, teamLockedTime, unsoldLockedTime, teamPercentage, salePercentage, ecosystemPercentage, {from: owner})
+    this.crowdsale = await LindaCrowdsale.new(this.startTime, this.endTime, rate, goal, cap, wallet, teamWallet, this.token.address, owner, teamLockedTime, unsoldLockedTime, {from: owner})
 
-    this.token = LindaToken.at(await this.crowdsale.token())
+    await this.token.transferOwnership(this.crowdsale.address, {from: owner})
+
   })
 
   it('cannot be finalized before ending', async function () {
@@ -66,6 +65,15 @@ contract('LindaCrowdsale', function ([_, owner, wallet, thirdparty, teamWallet])
     const {logs} = await this.crowdsale.finalize({from: owner})
     const event = logs.find(e => e.event === 'Finalized')
     should.exist(event)
+  })
+
+  it('token owner changes after finalizing', async function () {
+    var tokenOwner = await this.token.owner()
+    tokenOwner.should.equal(this.crowdsale.address)
+    await increaseTimeTo(this.afterEndTime)
+    await this.crowdsale.finalize({from: owner}).should.be.fulfilled
+    tokenOwner = await this.token.owner()
+    tokenOwner.should.equal(owner)
   })
 
 })

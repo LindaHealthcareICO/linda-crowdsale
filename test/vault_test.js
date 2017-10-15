@@ -41,11 +41,10 @@ contract('LindaCrowdsale', function([_, owner, investor, purchaser1, purchaser2,
     this.startTime = latestTime() + duration.weeks(1);
     this.endTime =   this.startTime + duration.weeks(1);
     this.afterEndTime = this.endTime + duration.seconds(1)
+    this.token = await LindaToken.new({from: owner});
 
-
-    this.crowdsale = await LindaCrowdsale.new(this.startTime, this.endTime, rate, goal, cap, wallet, teamWallet, teamLockTime, unsoldLockTime, teamPercentage, salePercentage, ecosystemPercentage, {from: owner})
-
-    this.token = LindaToken.at(await this.crowdsale.token())
+    this.crowdsale = await LindaCrowdsale.new(this.startTime, this.endTime, rate, goal, cap, wallet, teamWallet, this.token.address, owner, teamLockTime, unsoldLockTime, {from: owner})
+    await this.token.transferOwnership(this.crowdsale.address, {from: owner})
   })
 
   describe('team vault', function () {
