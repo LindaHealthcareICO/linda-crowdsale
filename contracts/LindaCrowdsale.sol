@@ -40,6 +40,9 @@ contract LindaCrowdsale is CappedCrowdsale, RefundableCrowdsale, Pausable {
         //As goal needs to be met for a successful crowdsale
         //the value needs to less or equal than a cap which is limit for accepted funds
         require(_goal <= _cap);
+        require(teamWallet != 0x0);
+        require(tokenAddress != 0x0);
+        require(tokenOwner != 0x0);
 
         maximumSaleTokenSupply = _cap.mul(_rate);
         teamWallet = _teamWallet;
@@ -57,11 +60,8 @@ contract LindaCrowdsale is CappedCrowdsale, RefundableCrowdsale, Pausable {
 
     function finalization() internal {
 
-        require(teamWallet != 0x0);
-        require(wallet != 0x0);
-
         if (goalReached()) {
-        // freeze tokens
+        // freeze tokens only if goal is reached
         teamVault = new TokenTimelock(token, teamWallet, uint64(now) + teamLockTime);
         unsoldVault = new TokenTimelock(token, wallet, uint64(now) + unsoldLockTime);
 
