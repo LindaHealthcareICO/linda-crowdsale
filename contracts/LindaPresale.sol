@@ -20,7 +20,7 @@ contract LindaPresale is CappedCrowdsale, RefundableCrowdsale {
         //As goal needs to be met for a successful crowdsale
         //the value needs to less or equal than a cap which is limit for accepted funds
         require(_goal <= _cap);
-        require(tokenOwner != 0x0);
+        require(_tokenOwner != 0x0);
         maximumTokenSupply = _cap.mul(_rate);
         tokenOwner = _tokenOwner;
 

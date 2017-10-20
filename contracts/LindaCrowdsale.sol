@@ -40,9 +40,11 @@ contract LindaCrowdsale is CappedCrowdsale, RefundableCrowdsale, Pausable {
         //As goal needs to be met for a successful crowdsale
         //the value needs to less or equal than a cap which is limit for accepted funds
         require(_goal <= _cap);
-        require(teamWallet != 0x0);
-        require(tokenAddress != 0x0);
-        require(tokenOwner != 0x0);
+        require(_teamWallet != 0x0);
+        require(_tokenAddress != 0x0);
+        require(_tokenOwner != 0x0);
+        require(_teamLockTime > 0);
+        require(_unsoldLockTime > 0);
 
         maximumSaleTokenSupply = _cap.mul(_rate);
         teamWallet = _teamWallet;
