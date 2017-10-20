@@ -14,6 +14,9 @@ const duration = {
 
 module.exports = function (deployer, network, accounts) {
 
+  // WARNING: these parameters are for testing purposes.
+  // The real values of the ICO should be set at deployment time.
+
   // common parameters
   const startTime = web3.eth.getBlock('latest').timestamp + duration.minutes(5) // in time units
   const endTime = startTime + duration.minutes(10)
@@ -34,7 +37,7 @@ module.exports = function (deployer, network, accounts) {
   const teamLockTime = duration.minutes(5) // freezing time for the team tokens (9 months)
   const unsoldLockTime = duration.minutes(8) // freezing time for the unsold tokens (10 years)
 
-  deployer.deploy(LindaCrowdsale, startTime, endTime, rate, goal, cap, wallet, teamWallet, tokenAddress, tokenOwner, teamLockTime, unsoldLockTime)
+  //deployer.deploy(LindaCrowdsale, startTime, endTime, rate, goal, cap, wallet, teamWallet, tokenAddress, tokenOwner, teamLockTime, unsoldLockTime)
 
-  //deployer.deploy(LindaPresale, startTime, endTime, rate, goal, presaleCap, tokenOwner, wallet)
+  deployer.deploy(LindaPresale, startTime, endTime, rate, goal, presaleCap, tokenOwner, wallet)
 }
